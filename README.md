@@ -1,6 +1,6 @@
 # Book Downloader
 
-A Python-based desktop application for downloading and converting books to PDF format. This application features a bilingual interface (English and Azerbaijani) and includes dark/light mode support.
+A Python-based desktop application for downloading and converting books to PDF format. This application features a bilingual interface (English and Azerbaijani) and includes dark/light mode support. For Windows, just move to the Windows folder and download the .exe file. 
 
 ## Features
 
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-
+For Azerbaijani - similar but slightly different version: [https://cavid.info/amk-endirici/](https://cavid.info/amk-endirici/)
 1. Run the application:
 ```bash
 python kitab.py

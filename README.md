@@ -25,7 +25,7 @@ Pillow
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/book-downloader.git
+git clone https://github.com/cavidaga/book-downloader.git
 cd book-downloader
 ```
 
@@ -96,4 +96,4 @@ This application is not affiliated with the Azerbaijan National Library. Created
 
 Javid Agha - [https://cavid.info](https://cavid.info)
 
-Project Link: [https://github.com/yourusername/book-downloader](https://github.com/yourusername/book-downloader)
+Project Link: [https://github.com/cavidaga/kitab](https://github.com/cavidaga/kitab)

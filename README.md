@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-For Azerbaijani - similar but slightly different version: [https://cavid.info/amk-endirici/] (https://cavid.info/amk-endirici/)
+For Azerbaijani - similar but slightly different version: [https://cavid.info/amk-endirici/](https://cavid.info/amk-endirici/)
 1. Run the application:
 ```bash
 python kitab.py

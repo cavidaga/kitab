@@ -25,8 +25,8 @@ Pillow
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/cavidaga/book-downloader.git
-cd book-downloader
+git clone https://github.com/cavidaga/kitab.git
+cd kitab
 ```
 
 2. Install required packages:
@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 1. Run the application:
 ```bash
-python book_new.py
+python kitab.py
 ```
 
 2. Configure the following settings:

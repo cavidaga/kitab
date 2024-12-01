@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 1. Run the application:
 ```bash
-python book_new.py
+python kitab.py
 ```
 
 2. Enter the Book ID:

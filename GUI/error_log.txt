@@ -1,0 +1,4 @@
+Failed to download page 1: HTTPConnectionPool(host='web2.anl.az', port=81): Read timed out.
+Page 1: Failed to download.
+Failed to download page 2: HTTPConnectionPool(host='web2.anl.az', port=81): Max retries exceeded with url: /read/page.php?bibid=1339&pno=2 (Caused by ConnectTimeoutError(<HTTPConnection(host='web2.anl.az', port=81) at 0x7fe0c99362c0>, 'Connection to web2.anl.az timed out. (connect timeout=10)'))
+Page 2: Failed to download.

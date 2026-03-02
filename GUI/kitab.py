@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import time
@@ -262,6 +263,31 @@ def process_queue():
             log_message(f"Failed to complete download for Book ID: {bibid}.", "error")
     log_message("Queue processing complete.", "success")
 
+def fetch_metadata(bibid):
+    """Fetch metadata from the library's MARC catalogue for the given Book ID."""
+    url = f"https://ek.anl.az/lib/item?id=chamo:{bibid}&theme=e-kataloq"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            html = response.text
+            metadata = {}
+            # Extract title
+            title_match = re.search(r'<h1 class="title">(.*?)</h1>', html, re.DOTALL | re.IGNORECASE)
+            if title_match:
+                metadata['title'] = re.sub(r'<[^>]+>', '', title_match.group(1)).strip()
+            # Extract author
+            author_match = re.search(r'class="author">(.*?)</a>', html, re.DOTALL | re.IGNORECASE)
+            if author_match:
+                metadata['author'] = re.sub(r'<[^>]+>', '', author_match.group(1)).strip()
+            # Extract date (from MARC data inside e-kataloq html)
+            date_match = re.search(r'\$c\s+(\d{4})\s*</div>', html)
+            if date_match:
+                metadata['creationDate'] = date_match.group(1).strip()
+            return metadata
+    except Exception as e:
+        log_message(f"Warning: Metadata fetch failed: {e}", "warning")
+    return {}
+
 def create_pdf(book_dir, bibid, start_page, end_page):
     """Create a PDF from the downloaded images."""
     pdf_path = os.path.join(book_dir, f"book_{bibid}.pdf")
@@ -285,6 +311,19 @@ def create_pdf(book_dir, bibid, start_page, end_page):
     if images:
         images[0].save(pdf_path, save_all=True, append_images=images[1:])
         log_message(f"PDF saved: {pdf_path}", "success")
+        
+        # Apply metadata to the generated PDF
+        meta = fetch_metadata(bibid)
+        if meta and 'fitz' in sys.modules:
+            try:
+                doc = fitz.open(pdf_path)
+                doc.set_metadata(meta)
+                doc.saveIncr()
+                doc.close()
+                log_message(f"Applied metadata to PDF: Title: {meta.get('title', 'Unknown')}", "info")
+            except Exception as e:
+                log_message(f"Failed to apply metadata: {e}", "warning")
+
         # Cleanup after successful PDF creation
         if delete_images_var.get():
             for img_file in image_files:
@@ -592,7 +631,15 @@ retry_limit = int(retry_limit_var.get())  # Ensure it's treated as an integer
 retry_delay = float(retry_delay_var.get())  # Ensure it's treated as a float
 # Icon for the window
 icon_path = resource_path("icon.ico")
-root.iconbitmap(icon_path)
+try:
+    if sys.platform.startswith("win"):
+        root.iconbitmap(icon_path)
+    else:
+        # iconbitmap with .ico fails on Linux, use iconphoto instead
+        icon_img = ImageTk.PhotoImage(Image.open(icon_path))
+        root.iconphoto(True, icon_img)
+except Exception as e:
+    print(f"Warning: Failed to load application icon: {e}")
 
 # Language selection dropdown
 language_var = tk.StringVar(value="English")

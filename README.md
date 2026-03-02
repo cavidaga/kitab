@@ -1,6 +1,6 @@
 # AMK Downloader
 
-A desktop application built with Python and Tkinter for downloading and managing book pages from the Azerbaijan National Library digital collection.
+A cross-platform tool for downloading and managing book pages from the Azerbaijan National Library digital collection. Includes both a graphical desktop UI (via Tkinter) and a headless terminal CLI.
 
 ## Features
 
@@ -11,6 +11,7 @@ A desktop application built with Python and Tkinter for downloading and managing
   - Resume interrupted downloads
   - Progress tracking with visual indicators
 - **PDF Creation**: Automatically combines downloaded pages into a single PDF
+- **Rich Metadata**: Automatically fetches and applies MARC catalog metadata (Title, Author, Year) to generated PDFs
 - **Built-in Viewer**: Preview downloaded pages directly in the application
 - **Dark Mode**: Toggle between light and dark themes for comfortable viewing
 - **Queue System**: Add multiple books to a download queue
@@ -39,10 +40,14 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Run the application:
+There are two ways to use the application depending on your environment:
+
+### 1. Graphical User Interface
+Run the GUI application:
 ```bash
-python kitab.py
+python3 GUI/kitab.py
 ```
+*(Linux users can optionally run `./linux_setup.sh` to install desktop application shortcuts and check OS-level Tkinter dependencies!)*
 
 2. Enter the Book ID:
    - Accepts both numeric IDs and IDs with 'vtls' prefix (e.g., "vtls000000004")
@@ -58,6 +63,13 @@ python kitab.py
    - Select preferred language
 
 5. Click "Start Download" or add to queue for batch processing
+
+### 2. Headless Terminal CLI
+For pure-terminal users or server environments, run the CLI app without needing a desktop environment or Python `Tkinter`:
+```bash
+python3 kitab_cli.py vtls000000004 -s 1 -e 10 -d
+```
+Use `python3 kitab_cli.py --help` for the complete list of arguments and flags.
 
 ## Features in Detail
 

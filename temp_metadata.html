@@ -1,0 +1,743 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr">
+<head><script type="text/javascript" src="../wicket/resource/org.apache.wicket.resource.JQueryResourceReference/jquery/jquery-1.11.3.min-ver-895323ED2F7258AF4FAE2C738C8AEA49.js"></script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.behavior.JQueryBehavior/jquery-ui-1.11.4.custom.min-ver-CA86F37BBEE92F8F5E60A32C23618905.js"></script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.behavior.JQueryBehavior/jquery.cookie-ver-FAC04835FF4A7B4A029C7B7E91E7B750.js"></script>
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://ek.anl.az/api/unapi"/><script type="text/javascript" src="../wicket/resource/org.apache.wicket.ajax.AbstractDefaultAjaxBehavior/res/js/wicket-event-jquery.min-ver-CD167ED7BEFC26AED029F20C2EBF9AA7.js"></script>
+<script type="text/javascript" src="../wicket/resource/org.apache.wicket.ajax.AbstractDefaultAjaxBehavior/res/js/wicket-ajax-jquery.min-ver-373007567CBDD4D664471DD5DBA38759.js"></script>
+<script type="text/javascript" id="wicket-ajax-base-url">
+/*<![CDATA[*/
+Wicket.Ajax.baseUrl="lib/item?id=chamo:1339&amp;fromLocationLink=false&amp;theme=e-kataloq";
+/*]]>*/
+</script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.component.opac.item.RatingsPanel/ratings-ver-E4AFC44AAA1BBD2C8CEE211C2F93D1A9.js"></script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.component.LocaleDropDown/addUrlParam-ver-82B221D975654586499AB8BB24645506.js"></script>
+<script type="text/javascript" src="../wicket/resource/org.apache.wicket.extensions.ajax.markup.html.autocomplete.AutoCompleteBehavior/wicket-autocomplete.min-ver-9FB11C2AC0FBDE36252E50E13C8A305E.js"></script>
+<script type="text/javascript" >
+/*<![CDATA[*/
+Wicket.Event.add(window, "domready", function(event) { new Wicket.AutoComplete('id2','../wicket/page?0-1.IBehaviorListener.0-search-quickSearch-form-query',{preselect: false,maxHeight: -1,adjustInputWidth: true,useSmartPositioning: false,useHideShowCoveredIEFix: true,showListOnEmptyInput: false,ignoreBordersWhenPositioning: true,showListOnFocusGain: false,throttleDelay: 300,minInputLength: 1,parameterName: 'q',showCompleteListOnFocusGain: false},null);;});
+/*]]>*/
+</script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.behavior.JQueryBehavior/jquery.ui.notify-ver-E3FE61789842CE600350E76CBF7A6E72.js"></script>
+<script type="text/javascript" src="../wicket/resource/com.vtls.chamo.webapp.behavior.JQueryBehavior/toastfeedback-ver-6DD0FBB6003393FF17A8553B005FFAB9.js"></script>
+
+  <!-- HTTP 1.1 -->
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <!-- HTTP 1.0 -->
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <!-- Prevents caching at the Proxy Server -->
+  <meta http-equiv="Expires" content="0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta http-equiv="Refresh" content="1200;url=../auth/logout?url=/%3Ftheme%3De-kataloq&amp;theme=e-kataloq"/>
+  <title>Item Details | Elektron Kataloq</title>
+  
+  <link rel="shortcut icon" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/favicon-ver-E11C94C110D8E968D19BBFDAFD577036.ico?az-e~kataloq"/>
+    
+  <!-- TODO should be dyn. links -->
+  <link rel="stylesheet" type="text/css" href="../scripts/dojo/dijit/themes/dijit.css"/>
+  <link rel="stylesheet" type="text/css" href="../scripts/dojo/dijit/themes/tundra/tundra.css"/>
+
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9T5HVD4FM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', 'G-P9T5HVD4FM');
+</script>
+
+<script type="text/javascript">
+/*<![CDATA[*/
+
+$(document).ready(function() {
+        $('.records').each(function(){
+        var content = '';
+        $(this).find('div.record').each(function(){
+            var current = $(this);
+                content=current.html();
+                //var haslink=content.match(/<td>.*anl\.az[\.a-zA-Z0-9%\/_&;-]+\.pdf.*<\/td>/);
+                var haslink=content.match(/<td>.*anl\.az[\.a-zA-Z0-9%\/_&;-]+\.[pdf|PDF].*<\/td>/);
+                var bibid=content.match(/vtls[0-9]+/);
+                if (haslink != null) {
+                   content=content.replace(haslink,'<td><a href="http://web2.anl.az:81/read/page.php?bibid='+bibid+'" target="_blank" class="button">Onlayn oxumaq üçün</a></td>');
+                   current.html(content);
+                   //var lasttr = current.find('.recordCart');
+                   //lasttr.append( '&nbsp;&nbsp;<a href="http://web2.anl.az:81/read/page.php?bibid='+bibid+'" target="_blank" class="button">Onlayn oxumaq üçün</a>' );
+                }
+        });
+    });
+});
+
+/*]]>*/
+</script>
+
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/jquery-ui-1.11.4.custom-ver-DB2BA219F9AD80A302AE31C8965CFD97.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/jquery.minicolors-ver-ABC741231BB83BCCD431A18824551815.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/jquery.ui.notify-ver-0FACCFE6FA1D01367E823F14512835DF.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/theme-ver-6474BE8E760F428BF54B31A2438804A5.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/theme-override-ver-CDB11A69E91699755C92260FA77E26AD.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/print-ver-8DC1AB4A50408BAD7D2ED6314A916A4A.css?az-e~kataloq" media="print" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.BaseApplication/colors.css?az-e~kataloq" />
+<link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/webkit-fix-ver-47C63E6E600866370BA50AC7B4488FE2.css?az-e~kataloq" />
+<!--[if IE]><link rel="stylesheet" type="text/css" href="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/ie-fix-ver-4C4FBCD8C6201838023ADDE843026797.css?az-e~kataloq" /><![endif]-->
+<script type="text/javascript" >
+/*<![CDATA[*/
+Wicket.Event.add(window, "domready", function(event) { 
+Wicket.Ajax.ajax({"u":"../wicket/page?0-1.IBehaviorListener.0-recordCart-addToCart","e":"click","c":"id1"});;
+Wicket.Event.publish(Wicket.Event.Topic.AJAX_HANDLERS_BOUND);
+;});
+/*]]>*/
+</script>
+<script type="text/javascript" >
+/*<![CDATA[*/
+Wicket.Event.add(window, "load", function(event) { 
+$('form').not('.nonRefreshing').submit(function() {   if (this.beenSubmitted)     return false;   else     this.beenSubmitted = true; }); 
+;
+;});
+/*]]>*/
+</script>
+</head>
+<body class="tundra">
+  <div id="page">
+	  <div id="header" class="clearfix">
+  <div id="branding">
+    <div class="logo">
+      <a href="..?theme=e-kataloq"><img src="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/logo-ver-EF01DEA0B233C148D85FB32C540B3D71.bin?az-e~kataloq" alt="logo"/></a>
+    </div>
+    <div class="siteNameDisplay">
+      <a href="..?theme=e-kataloq">
+        Elektron Kataloq
+      </a>
+    </div>
+  </div>
+  
+  
+
+  
+  <div class="helpLink">
+	<a href="#" id="helpLink" onclick="gtag(&#039;event&#039;, &#039;/help&#039;, {&#039;/help&#039;:&#039;ItemDetailPage.htm&#039;});document.getElementById(&#039;helpLinkNew&#039;).click()">
+	  <img alt="Help" src="../wicket/resource/com.vtls.chamo.webapp.application.resources.Resources/help-ver-FB084FC152CD51E4CFAD79C8FFE48D40.png?az-e~kataloq"/>
+	</a>
+	<a href="../wicket/resource/com.vtls.chamo.webapp.application.help.HelpFile/ItemDetailPage-ver-A3D5FDF1AF400F5575C63554FCF46DCF.htm" id="helpLinkNew" onclick="var w = window.open(href, &#039;&#039;, &#039;scrollbars=yes,location=yes,menuBar=no,resizable=yes,status=no,toolbar=no,width=500,height=550&#039;); try {if (w.blur) w.focus();}catch(ignore){}; return false;"></a>
+</div>
+  
+  <div id="locale">
+    <select id="languageSelect" name="header:locale:languageSelect" onchange="window.location.search=addUrlParam(window.location.search, &#039;locale&#039;, this.options[selectedIndex].value)">
+<option selected="selected" value="az">Azərbaycanca</option>
+<option value="en">İngiliscə</option>
+<option value="ru">Rusca</option>
+</select>
+  </div>
+  
+  
+  
+  
+</div>
+	  <div id="content" class="clearfix">
+		  <div id="nav">
+      <div class="wrapper">
+        <ul id="primary-nav" class="menuList">
+          <li><a href="../auth/login?theme=e-kataloq"><span>Hesaba giriş</span></a></li><li><a href="../wicket/bookmarkable/com.vtls.chamo.webapp.component.listcart.OpacCartPage?theme=e-kataloq"><span>Qovluq</span></a></li><li><a href="../heading/search?theme=e-kataloq"><span>Başlıq üzrə axtarış</span></a></li><li><a href="../search/history?theme=e-kataloq"><span>Axtarış tarixi</span></a></li><li></li><li><a href="../auth/clearsession?theme=e-kataloq"><span>Seansı silmək</span></a></li>
+        </ul>
+        
+      <div class="mobileLink">
+        <a href="?theme=mobile">Mobil versiya</a>
+      </div>
+    
+        <br class="clear-both" />
+      </div>
+    </div>
+		  <div id="search">
+        <div class="quicksearch-panel">
+      <form id="id3" method="post" action="../wicket/page?0-1.IFormSubmitListener-search-quickSearch-form"><div style="width:0px;height:0px;position:absolute;left:-100px;top:-100px;overflow:hidden"><input type="hidden" name="id3_hf_0" id="id3_hf_0" /></div>
+          <div class="quicksearch-panel">
+            <input type="text" maxlength="250" size="50" value="" name="query" id="id2" autocomplete="off" placeholder="Axtarış"/>
+            <div class="advancedSearchLink"><a id="advancedSearchLink" href="../search/advanced?theme=e-kataloq">Ətraflı axtarış</a></div>
+          </div>
+          <div class="quicksearch-panel">
+            <input type="submit" class="button" value="Axtarış"/>
+          </div>
+      </form>
+    </div>
+                
+      </div>
+      <div id="feedback">
+      
+    </div><div id="toastFeedback">
+      <div id="toastFeedback" style="display:none">
+        <div id="feedback-template" class="feedback">
+          <ul class="feedbackPanel">
+            <li class="mainFeedbackPanel#{level}">
+              <a class="ui-notify-cross ui-notify-close" href="#">x</a>
+              <span class="mainFeedbackPanel#{level}">#{text}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div><script type="text/javascript">
+/*<![CDATA[*/
+$('#toastFeedback').notify();
+toastFeedback($('#feedback'), $('#toastFeedback'), {INFO:4000,WARNING:8000,ERROR:0,UNDEFINED:0})
+/*]]>*/
+</script>
+
+		  <div id="main">
+		    
+      <h1 class="title">Mövlanə İsmayıl Siracəddin Şirvani: Həyatı, fəaliyyəti və ardıcılları /M. R. Məhəmmədcəlil,  F. Xəlilli;  Elmi red.:  N. Əliyeva</h1>
+      <a href="../search/query?match_1=PHRASE&amp;field_1=a&amp;term_1=M%C9%99h%C9%99mm%C9%99dc%C9%99lil,+M%C9%99h%C9%99mm%C9%99d+R%C4%B1ht%C4%B1m+o%C4%9Flu.&amp;theme=e-kataloq" dir="ltr" class="author">Məhəmmədcəlil, Məhəmməd Rıhtım oğlu.</a>
+
+      <div id="searchInformation">
+        
+        
+        <ul>
+          <li class="index">
+            
+      
+    
+          </li>
+          <li class="index">
+            
+      
+    
+          </li>
+          <li class="header">
+            
+  <a href="#">
+</a>
+
+          </li>
+        </ul>
+      </div>
+      
+      
+      
+      
+      
+      <div id="bibliographicImage" data-isbn="" data-oclc="">
+  
+</div>
+
+      <div id="itemView" class="itemFields">
+        
+      <div class="itemFields">
+        <table>
+          <tr>
+            <td class="label" dir="ltr">Buraxılış məlumatları</td>
+            <td><div><span dir="ltr">Bakı: Adiloğlu, 2003</span></div></td>
+          </tr><tr>
+            <td class="label" dir="ltr">Fiziki xüsusiyyətləri</td>
+            <td><div><span dir="ltr">133 səh.: ill., 20 sm.</span></div></td>
+          </tr>
+          
+        </table>
+      </div>
+    
+        
+        
+        
+        
+        
+        
+      <div class="request-item">
+        
+        
+        
+      </div>
+           
+        
+  <div class="recordCart">
+    <a href="../wicket/page?0-1.ILinkListener-recordCart-addToCart" class="button" id="id1">Qovluğa əlavə etmək</a>
+    <a id="id4" style="display:none"></a>
+  </div>
+
+      </div>
+      
+      
+      <abbr class="unapi-id" title="1339"></abbr>
+    
+      
+      
+      
+      <div id="myTags">
+</div>
+      
+      <div>
+      <div id="averageRating" class="averageRating">
+        
+        Ümumi Qiymətləndirmə:
+        0
+      </div>
+      
+    </div>
+      
+      <div class="clear"></div>
+
+      
+      
+      
+
+      <div class="tabcontainer" id="itemTabs">
+      <ul>
+        <li id="tabs-1"><a href="#tabContents-1">Nüsxələr</a></li><li id="tabs-2"><a href="#tabContents-2">MARC yazı</a></li><li id="tabs-4"><a href="#tabContents-4">Digər informasiyalar</a></li><li id="tabs-5"><a href="#tabContents-5">Buraxılış</a></li>
+      </ul>
+      <div id="tabContents-1">
+  <form class="form" id="id5" method="post" action="../wicket/page?0-1.IFormSubmitListener-itemTabs-tabContents-1-filterForm"><div style="width:0px;height:0px;position:absolute;left:-100px;top:-100px;overflow:hidden"><input type="hidden" name="id5_hf_0" id="id5_hf_0" /></div>
+    <div>
+      
+      
+      
+        <label for="id6">Yerləşdiyi yer</label>
+        <select name="location" id="id6">
+<option selected="selected" value=""></option>
+<option value="150003">ANL Azərbaycan ədəbiyyatının arxivi şöbəsi</option>
+<option value="150021">ANL KS Azf</option>
+</select>
+      
+      
+      <input type="submit" value="Filtr" class="button"></input>
+    </div>
+  </form>
+
+  
+  
+
+  <form id="id7" method="post" action="../wicket/page?0-1.IFormSubmitListener-itemTabs-tabContents-1-copiesForm"><div style="width:0px;height:0px;position:absolute;left:-100px;top:-100px;overflow:hidden"><input type="hidden" name="id7_hf_0" id="id7_hf_0" /></div>
+    
+      <table class="table">
+
+<thead>
+  
+  <tr class="headers">
+    <th class="wicket_orderNone">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=0+asc&amp;theme=e-kataloq"><span>Yerləşdiyi yer</span></a>
+    </th><th class="wicket_orderNone">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=1+asc&amp;theme=e-kataloq"><span>Düzülüş şifrəsi</span></a>
+    </th><th class="wicket_orderNone">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=2+asc&amp;theme=e-kataloq"><span>İnventar nömrəsi</span></a>
+    </th><th class="wicket_orderNone">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=3+asc&amp;theme=e-kataloq"><span>Barkod</span></a>
+    </th><th class="wicket_orderUp">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=4+desc&amp;theme=e-kataloq"><span>Status</span></a>
+    </th><th class="wicket_orderNone">
+      <a href="./item?id=chamo:1339&amp;fromLocationLink=false&amp;copies-sort=5+asc&amp;theme=e-kataloq"><span>Hissə</span></a>
+    </th><th>
+      <span><span>&nbsp;</span></span>
+    </th>
+  </tr>
+
+  <tr style="display: none;"><td></td></tr>
+</thead>
+
+<tbody>
+  <tr class="odd">
+    <td>
+      <div>ANL KS Azf</div>
+    </td><td>
+      <div>Azf-226856</div>
+    </td><td>
+      
+    </td><td>
+      <div>76FBA0032E3A</div>
+    </td><td>
+      <div>İstifadəsi mümkündür</div>
+    </td><td>
+      <div></div>
+    </td><td class="buttonColumn">
+      <div>
+    <a href="../wicket/page?0-1.ILinkListener-itemTabs-tabContents-1-copiesForm-copiesGroup-copies-body-rows-1-cells-7-cell-requestButton" class="button">Sifariş</a>
+    
+  </div>
+    </td>
+  </tr><tr class="even">
+    <td>
+      <div>ANL KS Azf</div>
+    </td><td>
+      <div>Azf-230219</div>
+    </td><td>
+      
+    </td><td>
+      <div>76FBA0034F96</div>
+    </td><td>
+      <div>İstifadəsi mümkündür</div>
+    </td><td>
+      <div></div>
+    </td><td class="buttonColumn">
+      <div>
+    <a href="../wicket/page?0-1.ILinkListener-itemTabs-tabContents-1-copiesForm-copiesGroup-copies-body-rows-2-cells-7-cell-requestButton" class="button">Sifariş</a>
+    
+  </div>
+    </td>
+  </tr><tr class="odd">
+    <td>
+      <div>ANL Azərbaycan ədəbiyyatının arxivi şöbəsi</div>
+    </td><td>
+      <div>2003/365</div>
+    </td><td>
+      <div>72563</div>
+    </td><td>
+      
+    </td><td>
+      <div>Arxivdədir</div>
+    </td><td>
+      <div></div>
+    </td><td class="buttonColumn">
+      <div>
+    
+    
+  </div>
+    </td>
+  </tr>
+  <tr style="display: none;"><td></td></tr>
+</tbody>
+</table>
+      
+    
+  </form>
+    
+  
+  
+  
+
+</div><div id="tabContents-2">
+  <div class="detail">
+    
+      <div class="marcTag">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div>
+        <div class="newMarcData">02295nam a2200385 i 4500</div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">001</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div>
+        <div class="newMarcData">vtls000001339</div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">003</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div>
+        <div class="newMarcData">NLA</div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">005</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div>
+        <div class="newMarcData">20200304162100.0</div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">008</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div class="marcIndicator">&nbsp;</div>
+      <div>
+        <div class="newMarcData">050228s2003&nbsp;&nbsp;&nbsp; aj a&nbsp;&nbsp; er&nbsp;&nbsp;&nbsp;&nbsp; 000 0 aze c</div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">020</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$c 500 nüsxə </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">039</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator">9</div>
+      <div>
+        <div class="newMarcData">$a 202003041621 $b e-res $c 200609061109 $d kat5 $c 200602071201 $d kat10 $c 200512261025 $d kat8 $y 200502281534 $z kat10 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">040</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a ANL $b aze $c ANL $e psbo </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">041</div>
+      <div class="marcIndicator">0</div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a aze </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">044</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a az </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">084</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Э38 $b M48 $2 rubbk </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">084</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Ю21.5 $2 rubbk </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">084</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Т3(2А) $2 rubbk </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">100</div>
+      <div class="marcIndicator">1</div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Məhəmmədcəlil, Məhəmməd Rıhtım oğlu </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">245</div>
+      <div class="marcIndicator">1</div>
+      <div class="marcIndicator">0</div>
+      <div>
+        <div class="newMarcData">$a Mövlanə İsmayıl Siracəddin Şirvani: $b Həyatı, fəaliyyəti və ardıcılları $c M. R. Məhəmmədcəlil,&nbsp; F. Xəlilli;&nbsp; Elmi red.:&nbsp; N. Əliyeva </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">260</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Bakı $b Adiloğlu $c 2003 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">300</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a 133 səh. $b ill. $c 20 sm. </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">500</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Əlavələr: səh. 105-126 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">500</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Üz qabığının arxa hissəsindəki yazıda &quot;Ya Həzrəti Pir Məhəmməd Bahaəddin Şahi Nəqşibənd &quot;&nbsp; yazılmışdır. </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">500</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Elektron resursdan kitabxananın Oxuculara xidmət&nbsp; şöbəsinin Lokal şəbəkədən istifadə üzrə oxu zalı bölməsində lokal şəbəkədə istifadə etmək olar. </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">504</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Bibl.: səh. 127-130 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">533</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Elektron resurs $b Bakı $c M. F. Axundov ad. Azərbaycan Milli Kitabxanası $d 2017 $e 1 fayl PDF $n Kitabxananın Oxuculara xidmət şöbəsinin Lokal şəbəkədən istifadə üzrə oxu zalı bölməsində lokal şəbəkədə istifadə etmək olar. </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">600</div>
+      <div class="marcIndicator">0</div>
+      <div class="marcIndicator">7</div>
+      <div>
+        <div class="newMarcData">$a Mövlanə İsmayıl Siracəddin Şirvani: $c sufi alimi $x həyatı $x fəaliyyəti $y XIX əsr $2 &lt;ANL_SH&gt; </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">653</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a tarixşünaslıq </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">700</div>
+      <div class="marcIndicator">1</div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Xəlilli, Fariz Sabir oğlu. $c tarix üzrə fəls. d-ru $d 1980- $4 aut </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">700</div>
+      <div class="marcIndicator">1</div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a Əliyeva, Nərgiz Ağasəlim qızı $4 edt </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">856</div>
+      <div class="marcIndicator">4</div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$u http://web.anl.az/el/Kitab/2020/03/Azf-230219.pdf $n M.F. Axundov ad. Milli Kitabxana. Biblioqrafik və elektron informasiya xidməti şöbəsi, Bakı, Azərb. Resp. $z Elektron resursdan kitabxananın Oxuculara xidmət&nbsp; şöbəsinin Lokal şəbəkədən istifadə üzrə oxu zalı bölməsində lokal şəbəkədə istifadə etmək olar. </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">910</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a MB 2003 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">920</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a web </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">999</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a VIRTUA40 </div>
+        <a href="#"></a>
+      </div>
+    
+      <div class="marcTag">999</div>
+      <div class="marcIndicator"> </div>
+      <div class="marcIndicator"> </div>
+      <div>
+        <div class="newMarcData">$a VTLSSORT0080*0200*0400*0410*0440*0840*0841*0842*1000*2450*2600*3000*5000*5001*5002*5040*5330*6000*6530*7000*7001*8560*9100*9200*9992 </div>
+        <a href="#"></a>
+      </div>
+    
+  </div>
+</div><div id="tabContents-4">
+      <div class="itemFields">
+        <table>
+          <tr>
+            <td class="label" dir="ltr">Müəllif</td>
+            <td><div><span dir="ltr">Məhəmmədcəlil, Məhəmməd Rıhtım oğlu</span></div></td>
+          </tr><tr>
+            <td class="label" dir="ltr">Sərlövhə </td>
+            <td><div><span dir="ltr">Mövlanə İsmayıl Siracəddin Şirvani: Həyatı, fəaliyyəti və ardıcılları /M. R. Məhəmmədcəlil,  F. Xəlilli;  Elmi red.:  N. Əliyeva</span></div></td>
+          </tr><tr>
+            <td class="label" dir="ltr">Predmet</td>
+            <td><div><span dir="ltr">Mövlanə İsmayıl Siracəddin Şirvani: (sufi alimi) həyatı fəaliyyəti XIX əsr</span></div></td>
+          </tr><tr>
+            <td class="label" dir="ltr">Multimedia</td>
+            <td><div><a href="http://web.anl.az/el/Kitab/2020/03/Azf-230219.pdf" onclick="var w = window.open(href, &#039;&#039;, &#039;scrollbars=yes,location=no,menuBar=no,resizable=yes,status=no,toolbar=no&#039;); try {if (w.blur) w.focus();}catch(ignore){}; return false;" dir="ltr">http://web.anl.az/el/Kitab/2020/03/Azf-230219.pdf</a></div></td>
+          </tr><tr>
+            <td class="label" dir="ltr">Digər məlumatlar</td>
+            <td><div><span dir="ltr">Əlavələr: səh. 105-126</span></div><div><span dir="ltr">Üz qabığının arxa hissəsindəki yazıda &quot;Ya Həzrəti Pir Məhəmməd Bahaəddin Şahi Nəqşibənd &quot;  yazılmışdır.</span></div><div><span dir="ltr">Elektron resursdan kitabxananın Oxuculara xidmət  şöbəsinin Lokal şəbəkədən istifadə üzrə oxu zalı bölməsində lokal şəbəkədə istifadə etmək olar.</span></div></td>
+          </tr>
+          
+        </table>
+      </div>
+    </div><div id="tabContents-5">
+    <form id="id8" method="post" action="../wicket/page?0-1.IFormSubmitListener-itemTabs-tabContents-5-holdingsForm"><div style="width:0px;height:0px;position:absolute;left:-100px;top:-100px;overflow:hidden"><input type="hidden" name="id8_hf_0" id="id8_hf_0" /></div>
+      
+      
+      <div class="issues">
+         
+        <strong><span>ANL - Bakı</span> </strong>
+        <span class="button"> - Sorğu imkanı yoxdur</span>
+        
+        
+        
+        <ul>
+          
+          
+          
+        </ul>
+      </div>
+      
+      
+    </form>
+    </div>
+    </div><script type="text/javascript">
+/*<![CDATA[*/
+$(function() { 
+  var tabContainer = $('#itemTabs'); 
+  tabContainer.tabs({ 
+    activate: function( event, ui ) { 
+     if(true) { 
+      $.cookie('itemTabsCookie-e-kataloq', null); 
+      $.cookie('itemTabsCookie-e-kataloq', tabContainer.tabs('option','active'), {path: '/'}); 
+     } 
+    } 
+  }); 
+  var selectedTab = null; 
+  var selectedTabIndex = null; 
+  var defaultOnly = true; 
+  var cookie = $.cookie('itemTabsCookie-e-kataloq'); 
+  if ((selectedTab == null || defaultOnly) && cookie != null) { 
+    selectedTabIndex = cookie; 
+  } else if (selectedTab != null){ 
+    selectedTabIndex = $('#itemTabs a[href="#null"]').parent().index(); 
+  } 
+  if (selectedTabIndex != null) { 
+    tabContainer.tabs('option', 'active' , selectedTabIndex); 
+  } 
+});
+/*]]>*/
+</script>
+
+    
+		  </div>
+		</div>
+	  <div id="footer" class="clearfix">
+  <div id="divider">&nbsp;</div>
+  <span class="left">
+    <span id="version" class="left">Version 3.7.SP2</span>
+    <a id="id9" style="display:none"></a>
+    
+  </span>
+  <span class="right">
+    &copy; <a href="https://www.iii.com">Innovative Interfaces, Inc.</a>
+  </span>
+</div>
+    
+	</div>
+</body>
+</html>

@@ -10,7 +10,10 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 import tkinter as tk
 from tkinter import ttk
-import fitz
+try:
+    import fitz
+except ImportError:
+    fitz = None
 
 # Define supported languages and translations
 LANGUAGES = {
@@ -93,9 +96,9 @@ class ToolTip:
     def show_tooltip(self, event=None):
         if self.tooltip_window:
             return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 25
+        # Fix #3: bbox("insert") crashes on non-Text widgets; use widget geometry instead
+        x = self.widget.winfo_rootx() + 25
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
         self.tooltip_window = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(True)
         tw.wm_geometry(f"+{x}+{y}")
@@ -140,32 +143,28 @@ def get_total_pages(bibid):
     raise ValueError("Failed to fetch the total number of pages.")
 
 
-def download_page(session, bibid, page_no, output_file):
-    """Download a single page."""
+def download_page(session, bibid, page_no, output_file, retry_limit=3, retry_delay=1.0):
+    """Download a single page with retry support. Fix #2: retry logic now implemented."""
     preload_url = f"{BASE_URL}/page.php?bibid={bibid}&pno={page_no}"
     image_url = f"{BASE_URL}/img.php?bibid={bibid}&pno={page_no}"
 
-    try:
-        # Preload the page
-        session.get(preload_url, headers=HEADERS, timeout=10).raise_for_status()
-        time.sleep(DELAY)  # Wait to mimic human browsing
-
-        # Download the image
-        response = session.get(image_url, headers=HEADERS, stream=True, timeout=10)
-        response.raise_for_status()
-
-        # Save the image to file
-        with open(output_file, "wb") as f:
-            f.write(response.content)
-
-        # Validate file size
-        if os.path.getsize(output_file) < MIN_IMAGE_SIZE:
-            raise ValueError("File size too small. The image may be invalid.")
-
-        return True
-    except Exception as e:
-        log_message(f"Failed to download page {page_no}: {e}", "error")
-        return False
+    for attempt in range(1, retry_limit + 1):
+        try:
+            session.get(preload_url, headers=HEADERS, timeout=10).raise_for_status()
+            time.sleep(DELAY)
+            response = session.get(image_url, headers=HEADERS, stream=True, timeout=10)
+            response.raise_for_status()
+            with open(output_file, "wb") as f:
+                f.write(response.content)
+            if os.path.getsize(output_file) < MIN_IMAGE_SIZE:
+                raise ValueError("File size too small. The image may be invalid.")
+            return True
+        except Exception as e:
+            log_message(f"Page {page_no}: attempt {attempt}/{retry_limit} failed: {e}", "warning")
+            if attempt < retry_limit:
+                time.sleep(retry_delay)
+    log_message(f"Failed to download page {page_no} after {retry_limit} attempts.", "error")
+    return False
 
 def download_book(bibid, output_dir, retry_limit, retry_delay, delete_images, start_page=1, end_page=None):
     """Download the book with page range support."""
@@ -209,7 +208,7 @@ def download_book(bibid, output_dir, retry_limit, retry_delay, delete_images, st
                 update_progress(page_no - start_page + 1)
                 continue
 
-            if download_page(session, bibid, page_no, output_file):
+            if download_page(session, bibid, page_no, output_file, retry_limit, retry_delay):
                 pages_downloaded += 1
                 log_message(f"Page {page_no} downloaded successfully.", "success")
             else:
@@ -224,12 +223,21 @@ def download_book(bibid, output_dir, retry_limit, retry_delay, delete_images, st
 
 
 def start_queue_thread():
-    """Start queue processing in a separate thread."""
+    """Start queue processing in a separate thread.
+    Fix #6: filedialog must be called on the main thread, so ask for the
+    output directory here before spawning the worker thread."""
     global cancel_flag
+    if not queue:
+        log_message("Queue is empty.", "warning")
+        return
     cancel_flag = False
-    threading.Thread(target=process_queue, daemon=True).start()
+    output_dir = filedialog.askdirectory(title="Select folder to save all queue downloads")
+    if not output_dir:
+        log_message("No folder selected. Queue cancelled.", "warning")
+        return
+    threading.Thread(target=process_queue, args=(output_dir,), daemon=True).start()
 
-def process_queue():
+def process_queue(output_dir):
     """Process the queue of book downloads."""
     global cancel_flag
     while queue:
@@ -238,24 +246,22 @@ def process_queue():
             return
 
         raw_bibid = queue.pop(0)
-        update_queue_display()
+        root.after(0, update_queue_display)  # UI updates must be on the main thread
 
         try:
-            # Normalize the bibid
             bibid = normalize_bibid(raw_bibid)
         except ValueError as e:
             log_message(f"Skipping invalid Book ID in queue: {raw_bibid}. Error: {e}", "error")
             continue
 
-        output_dir = filedialog.askdirectory(title="Select folder to save downloads")
-        if not output_dir:
-            log_message(f"No folder selected for Book ID: {bibid}. Skipping.", "warning")
-            continue
+        end_page = end_page_var.get()
+        if end_page <= 0:  # Fix #5: treat 0 as "no limit"
+            end_page = None
 
         log_message(f"Starting download for Book ID: {bibid}.", "info")
         success = download_book(
             bibid, output_dir, retry_limit_var.get(), retry_delay_var.get(),
-            delete_images_var.get(), start_page_var.get(), end_page_var.get()
+            delete_images_var.get(), start_page_var.get(), end_page
         )
         if success:
             log_message(f"Completed download for Book ID: {bibid}.", "success")
@@ -314,7 +320,7 @@ def create_pdf(book_dir, bibid, start_page, end_page):
         
         # Apply metadata to the generated PDF
         meta = fetch_metadata(bibid)
-        if meta and 'fitz' in sys.modules:
+        if meta and fitz is not None:  # Fix: check the module object, not sys.modules
             try:
                 doc = fitz.open(pdf_path)
                 doc.set_metadata(meta)
@@ -336,28 +342,30 @@ def create_pdf(book_dir, bibid, start_page, end_page):
         log_message("No valid images to create a PDF.", "error")
 
 def toggle_dark_mode():
-    """Switch between light and dark modes."""
+    """Switch between light and dark modes.
+    Fix #8: recursively update ALL widgets, not just direct children of root."""
     global dark_mode
     dark_mode = not dark_mode
-    style = {"dark": {"bg": "#2C2C2C", "fg": "#FFFFFF"},
-             "light": {"bg": "#F0F0F0", "fg": "#000000"}}
+    colors = {"dark": {"bg": "#2C2C2C", "fg": "#FFFFFF"},
+              "light": {"bg": "#F0F0F0", "fg": "#000000"}}
     mode = "dark" if dark_mode else "light"
-    root.configure(bg=style[mode]["bg"])
-    # Update widgets for dark mode
-    for widget in root.winfo_children():
-        if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
-            widget.configure(bg=style[mode]["bg"], fg=style[mode]["fg"])
+    bg, fg = colors[mode]["bg"], colors[mode]["fg"]
 
-def log_message(message, level="info"):
-    """Log messages to the UI with colour coding."""
-    log_text.insert(tk.END, message + "\\n", level)
-    if level == "error":
-        log_text.tag_configure("error", foreground="red")
-    elif level == "warning":
-        log_text.tag_configure("warning", foreground="orange")
-    elif level == "success":
-        log_text.tag_configure("success", foreground="green")
-    log_text.see(tk.END)
+    def apply_theme(widget):
+        try:
+            if isinstance(widget, (tk.Frame, tk.LabelFrame)):
+                widget.configure(bg=bg)
+            elif isinstance(widget, (tk.Label, tk.Button, tk.Checkbutton)):
+                widget.configure(bg=bg, fg=fg)
+        except tk.TclError:
+            pass
+        for child in widget.winfo_children():
+            apply_theme(child)
+
+    root.configure(bg=bg)
+    apply_theme(root)
+
+# Fix #1: removed duplicate log_message that used literal '\\n' and was overridden below
 
 # Collapsible log functionality
 def toggle_log_panel():
@@ -375,9 +383,8 @@ def start_download_thread():
     global cancel_flag
     cancel_flag = False
     bibid_raw = bibid_entry.get().strip()
-    
+
     try:
-        # Normalize the bibid to extract the numeric part
         bibid = normalize_bibid(bibid_raw)
     except ValueError as e:
         log_message(str(e), "error")
@@ -390,20 +397,27 @@ def start_download_thread():
 
     start_page = start_page_var.get()
     end_page = end_page_var.get()
+    if end_page <= 0:  # Fix #5: 0 means "no end page specified"
+        end_page = None
 
-    threading.Thread(
-        target=download_book,
-        args=(
+    # Fix #7: enable cancel button, disable start button during download
+    cancel_button.config(state="normal")
+    start_button.config(state="disabled")
+
+    def run():
+        download_book(
             bibid,
             output_dir,
-            retry_limit,  # Use casted variable
-            retry_delay,
+            retry_limit_var.get(),   # Fix #2: read live values, not stale scalars
+            retry_delay_var.get(),
             delete_images_var.get(),
             start_page,
             end_page,
-        ),
-        daemon=True
-    ).start()
+        )
+        root.after(0, lambda: cancel_button.config(state="disabled"))
+        root.after(0, lambda: start_button.config(state="normal"))
+
+    threading.Thread(target=run, daemon=True).start()
 
 def cancel_download():
     """Cancel the ongoing download."""
@@ -415,7 +429,9 @@ def cancel_download():
 def update_progress(current_page):
     """Update the progress bar, progress text, and statistics."""
     progress_bar["value"] = current_page
-    progress_percentage = (current_page / total_pages) * 100 if total_pages > 0 else 0
+    # Fix #4: use the bar's own maximum (the page range) not total_pages for percentage
+    bar_max = progress_bar["maximum"]
+    progress_percentage = (current_page / bar_max) * 100 if bar_max > 0 else 0
     elapsed_time = time.time() - start_time
     avg_time_per_page = elapsed_time / current_page if current_page > 0 else 0
     estimated_time_remaining = (total_pages - current_page) * avg_time_per_page
@@ -560,11 +576,18 @@ def write_to_error_log(message):
             log_file.write(message + "\n")
 
 def log_message(message, level="info"):
-    """Log messages to the UI and the error log if it's an error."""
+    """Log messages to the UI and the error log if it's an error.
+    Fix #1: this is the single authoritative log_message; tag_configure calls
+    are here so colour coding actually works."""
     log_text.insert(tk.END, message + "\n", level)
-    log_text.see(tk.END)
     if level == "error":
+        log_text.tag_configure("error", foreground="red")
         write_to_error_log(message)
+    elif level == "warning":
+        log_text.tag_configure("warning", foreground="orange")
+    elif level == "success":
+        log_text.tag_configure("success", foreground="green")
+    log_text.see(tk.END)
 
 def view_error_log():
     """View the contents of the error log in a popup window."""

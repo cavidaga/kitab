@@ -7,7 +7,8 @@ from PIL import Image
 try:
     import fitz
 except ImportError:
-    pass
+    fitz = None
+    print("Warning: PyMuPDF (fitz) not found. PDF metadata will not be applied.", file=sys.stderr)
 import re
 import argparse
 
@@ -30,7 +31,7 @@ def normalize_bibid(bibid):
 
 def get_total_pages(bibid):
     page_url = f"{BASE_URL}/page.php?bibid={bibid}&pno=1"
-    response = requests.get(page_url, headers=HEADERS)
+    response = requests.get(page_url, headers=HEADERS, timeout=10)  # Fix #10: added timeout
     response.raise_for_status()
     match = re.search(r'last_page_params="\?bibid=\d+&pno=(\d+)"', response.text)
     if match:
@@ -97,9 +98,10 @@ def create_pdf(book_dir, bibid, start_page, end_page, delete_images):
     if images:
         images[0].save(pdf_path, save_all=True, append_images=images[1:])
         print(f"PDF saved successfully: {pdf_path}")
-        
+
+        # Fix #9: fitz is None when not installed, guard against it
         meta = fetch_metadata(bibid)
-        if meta and 'fitz' in sys.modules:
+        if meta and fitz is not None:
             try:
                 doc = fitz.open(pdf_path)
                 doc.set_metadata(meta)
@@ -138,7 +140,7 @@ def download_book(bibid, output_dir, delete_images, start_page=1, end_page=None)
         end_page = start_page
 
     print(f"Downloading pages {start_page} to {end_page} of {total_pages} for book ID: {bibid}.")
-    
+
     pages_downloaded = 0
     pages_failed = 0
 
@@ -171,7 +173,7 @@ def main():
     parser.add_argument("-s", "--start", type=int, default=1, help="Start page (default: 1)")
     parser.add_argument("-e", "--end", type=int, default=None, help="End page (default: total pages)")
     parser.add_argument("-d", "--delete", action="store_true", help="Delete raw images after PDF creation")
-    
+
     args = parser.parse_args()
 
     try:

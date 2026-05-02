@@ -4,6 +4,12 @@ const { downloadBook, cancelDownload } = require('./downloader')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
+// Disable hardware sandbox on Linux to prevent launch issues for end-users
+// on modern distributions (like Ubuntu 24.04+) with strict user namespaces.
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('no-sandbox')
+}
+
 // ─── Create Window ────────────────────────────────────────────────────────────
 function createWindow() {
   const win = new BrowserWindow({

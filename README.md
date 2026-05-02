@@ -7,8 +7,12 @@
   <img src="https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
 </a>
 &nbsp;
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-linux.deb">
+  <img src="https://img.shields.io/badge/Download_for-Ubuntu_/_Debian-A81D33?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Download for Ubuntu / Debian (.deb)" />
+</a>
+&nbsp;
 <a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-linux.AppImage">
-  <img src="https://img.shields.io/badge/Download_for-Linux-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" />
+  <img src="https://img.shields.io/badge/Download_for-Linux_(AppImage)-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux AppImage" />
 </a>
 &nbsp;
 <a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-mac-arm64.dmg">
@@ -47,11 +51,17 @@
 
 > **"Windows protected your PC" warning** — This appears because the app isn't signed with a paid code-signing certificate. Click **More info → Run anyway** to proceed. The app is open source and the full code is in this repository.
 
-**Linux** — Make the AppImage executable and run it:
+**Linux (.deb)** — Install the native package on Debian/Ubuntu:
+```bash
+sudo apt install ./Kitab-linux.deb
+```
+
+**Linux (.AppImage)** — Make it executable and run it:
 ```bash
 chmod +x Kitab-linux.AppImage
 ./Kitab-linux.AppImage
 ```
+> **AppImage FUSE error?** Modern Linux distros (Ubuntu 22.04+) require FUSE 2. If you see `dlopen(): error loading libfuse.so.2`, you can either install it (`sudo apt install libfuse2`) or use the `.deb` version instead.
 
 **macOS** — Open the `.dmg`, drag Kitab to Applications. Use `arm64` for Apple Silicon (M1/M2/M3) or `x64` for Intel Macs.
 

@@ -58,10 +58,10 @@
       "shortcutName": "Kitab"
     },
     "linux": {
-      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "target": ["AppImage", "deb"],
       "category": "Utility",
       "icon": "assets/icon.png",
-      "artifactName": "Kitab-linux.AppImage"
+      "artifactName": "Kitab-linux.${ext}"
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],

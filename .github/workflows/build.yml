@@ -1,0 +1,85 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'          # Triggers on version tags like v1.0.0
+  workflow_dispatch:  # Manual trigger from GitHub UI
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            artifact: dist-electron/*.exe
+          - os: ubuntu-latest
+            platform: linux
+            artifact: dist-electron/*.AppImage
+          - os: macos-latest
+            platform: mac
+            artifact: dist-electron/*.dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: electron-app/package-lock.json
+
+      # Linux: install dependencies for electron-builder
+      - name: Install Linux build deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm fakeroot dpkg
+
+      - name: Install npm dependencies
+        working-directory: electron-app
+        run: npm ci
+
+      - name: Build Vite renderer
+        working-directory: electron-app
+        run: npm run build
+
+      - name: Package with electron-builder
+        working-directory: electron-app
+        run: npx electron-builder --${{ matrix.platform }} --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitab-${{ matrix.platform }}
+          path: electron-app/${{ matrix.artifact }}
+          if-no-files-found: warn
+
+  # Create a GitHub Release when a version tag is pushed
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*
+          generate_release_notes: true

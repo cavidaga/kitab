@@ -1,0 +1,64 @@
+{
+  "name": "kitab",
+  "version": "1.0.0",
+  "description": "Kitab — Azerbaijan National Library Downloader",
+  "main": "src/main/main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --no-sandbox\"",
+    "build": "vite build",
+    "dist": "vite build && electron-builder",
+    "dist:win": "vite build && electron-builder --win",
+    "dist:linux": "vite build && electron-builder --linux",
+    "dist:mac": "vite build && electron-builder --mac",
+    "start": "electron . --no-sandbox"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.0.7",
+    "wait-on": "^8.0.1"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "build": {
+    "appId": "az.anl.kitab",
+    "productName": "Kitab",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "src/main/**/*",
+      "assets/**/*",
+      "node_modules/pdf-lib/**/*"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Kitab"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.utilities"
+    }
+  }
+}

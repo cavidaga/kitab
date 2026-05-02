@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
 </a>
 &nbsp;
-<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-linux-x64.AppImage">
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-linux.AppImage">
   <img src="https://img.shields.io/badge/Download_for-Linux-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" />
 </a>
 &nbsp;
@@ -49,8 +49,8 @@
 
 **Linux** — Make the AppImage executable and run it:
 ```bash
-chmod +x Kitab-linux-x64.AppImage
-./Kitab-linux-x64.AppImage
+chmod +x Kitab-linux.AppImage
+./Kitab-linux.AppImage
 ```
 
 **macOS** — Open the `.dmg`, drag Kitab to Applications. Use `arm64` for Apple Silicon (M1/M2/M3) or `x64` for Intel Macs.

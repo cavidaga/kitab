@@ -17,7 +17,7 @@ jobs:
             artifact: dist-electron/Kitab-Setup-x64.exe
           - os: ubuntu-latest
             platform: linux
-            artifact: dist-electron/Kitab-linux-x64.AppImage
+            artifact: dist-electron/Kitab-linux.AppImage
           - os: macos-latest
             platform: mac
             artifact: dist-electron/Kitab-mac-*.dmg

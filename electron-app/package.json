@@ -61,7 +61,7 @@
       "target": [{ "target": "AppImage", "arch": ["x64"] }],
       "category": "Utility",
       "icon": "assets/icon.png",
-      "artifactName": "Kitab-linux-${arch}.AppImage"
+      "artifactName": "Kitab-linux.AppImage"
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],

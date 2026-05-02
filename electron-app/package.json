@@ -61,7 +61,10 @@
       "target": ["AppImage", "deb"],
       "category": "Utility",
       "icon": "assets/icon.png",
-      "artifactName": "Kitab-linux.${ext}"
+      "artifactName": "Kitab-linux.${ext}",
+      "executableArgs": [
+        "--no-sandbox"
+      ]
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],

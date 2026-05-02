@@ -1,145 +1,109 @@
-# AMK Downloader
+# Kitab
 
-A cross-platform tool for downloading and managing book pages from the Azerbaijan National Library digital collection. Includes both a graphical desktop UI (via Tkinter) and a headless terminal CLI.
+A desktop app for downloading books from the [Azerbaijan National Library](http://web2.anl.az:81/read) digital collection. Downloads pages, assembles them into a PDF with catalog metadata, and saves everything locally.
+
+Built with Electron + React. No Python, no extra runtimes — just download and run.
+
+---
+
+## Download
+
+Grab the latest release for your platform from the [Releases page](https://github.com/cavidaga/kitab/releases):
+
+| Platform | File |
+|---|---|
+| **Windows** | `Kitab Setup x.x.x.exe` |
+| **Linux** | `Kitab-x.x.x.AppImage` |
+
+> Windows users: run the installer, click through the wizard, launch from the desktop shortcut.  
+> Linux users: `chmod +x Kitab-*.AppImage && ./Kitab-*.AppImage`
+
+---
 
 ## Features
 
-- **Bilingual Interface**: Supports English and Azerbaijani languages
-- **Download Management**:
-  - Download single books or queue multiple downloads
-  - Specify custom page ranges
-  - Resume interrupted downloads
-  - Progress tracking with visual indicators
-- **PDF Creation**: Automatically combines downloaded pages into a single PDF
-- **Rich Metadata**: Automatically fetches and applies MARC catalog metadata (Title, Author, Year) to generated PDFs
-- **Built-in Viewer**: Preview downloaded pages directly in the application
-- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
-- **Queue System**: Add multiple books to a download queue
-- **Error Handling**: Comprehensive error logging and recovery system
-- **Resource Management**: Option to automatically delete image files after PDF creation
+- **Download books by ID** — accepts `vtls000000004` or bare numeric IDs
+- **Custom page ranges** — start and end page, or download the entire book
+- **Queue** — add multiple books, process them one by one
+- **PDF assembly** — pages are combined into a single PDF automatically
+- **Catalog metadata** — title, author, and year are fetched and embedded in the PDF
+- **Delete images after PDF** — keep only the PDF, discard the raw page files
+- **Activity log** — timestamped download events, collapsible
+- **Bilingual** — English and Azerbaijani interface
+- **Dark / Light mode**
 
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/cavidaga/kitab.git
-cd kitab
-```
-
-2. Install required dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### Dependencies
-- Python 3.7+
-- Pillow (PIL)
-- PyMuPDF (fitz)
-- requests
-- tkinter (usually comes with Python)
+---
 
 ## Usage
 
-There are two ways to use the application depending on your environment:
+1. Launch the app
+2. Paste a Book ID (e.g. `vtls000000004`) into the field
+3. Optionally set a start/end page (leave end blank to download everything)
+4. Click **Select output folder** to choose where files are saved
+5. Click **Download**
 
-### 1. Graphical User Interface
-Run the GUI application:
+To queue several books: fill in a Book ID and click **Add to queue** for each one, then click **Process queue**.
+
+---
+
+## CLI
+
+The headless Python CLI (`kitab_cli.py`) is still available for scripting and server use:
+
 ```bash
-python3 GUI/kitab.py
+python3 kitab_cli.py vtls000000004 -o ~/books -s 1 -e 50 -d
 ```
-*(Linux users can optionally run `./linux_setup.sh` to install desktop application shortcuts and check OS-level Tkinter dependencies!)*
 
-2. Enter the Book ID:
-   - Accepts both numeric IDs and IDs with 'vtls' prefix (e.g., "vtls000000004")
-   - The ID will be automatically normalized
+```
+positional arguments:
+  bibid                 Book ID (e.g. vtls000000004 or 4)
 
-3. Specify the page range:
-   - Start Page (defaults to 1)
-   - End Page (optional, defaults to total pages)
+options:
+  -o, --output DIR      Output directory (default: current directory)
+  -s, --start N         Start page (default: 1)
+  -e, --end N           End page (default: last page)
+  -d, --delete          Delete images after PDF creation
+  --json                Emit newline-delimited JSON events (for tooling)
+```
 
-4. Select download options:
-   - Choose whether to delete original images after PDF creation
-   - Enable/disable desktop notifications
-   - Select preferred language
+CLI dependencies: `pip install requests Pillow PyMuPDF`
 
-5. Click "Start Download" or add to queue for batch processing
+---
 
-### 2. Headless Terminal CLI
-For pure-terminal users or server environments, run the CLI app without needing a desktop environment or Python `Tkinter`:
+## Development
+
 ```bash
-python3 kitab_cli.py vtls000000004 -s 1 -e 10 -d
+git clone https://github.com/cavidaga/kitab.git
+cd kitab/electron-app
+npm install
+npm run dev        # Vite + Electron dev mode
 ```
-Use `python3 kitab_cli.py --help` for the complete list of arguments and flags.
 
-## Features in Detail
+**Stack:**
+- Electron 33 — desktop shell
+- React 18 + Vite — renderer
+- pdf-lib — PDF assembly (pure JS, no native deps)
+- Node.js built-in `http` — page fetching
 
-### Download Queue
-- Add multiple books to the download queue
-- Process queue sequentially
-- Cancel and resume queue processing
-- Remove items from queue
+**Build installers locally:**
+```bash
+npm run dist:win    # → dist-electron/Kitab Setup x.x.x.exe
+npm run dist:linux  # → dist-electron/Kitab-x.x.x.AppImage
+```
 
-### Built-in Viewer
-- View downloaded pages before PDF creation
-- Navigate between pages
-- Automatic image scaling to fit window
+CI builds run automatically on GitHub Actions when a version tag is pushed:
+```bash
+git tag v2.1.0 && git push origin v2.1.0
+```
 
-### Error Recovery
-- Automatic retry on failed downloads
-- Comprehensive error logging
-- View and clear error logs
-- Continue from last successful download
-
-### Localization
-Switch between:
-- English
-- Azərbaycan (Azerbaijani)
-
-## Configuration
-
-Default settings can be modified in the code:
-- `DELAY`: Time between page requests (default: 2 seconds)
-- `MIN_IMAGE_SIZE`: Minimum valid image size (default: 1024 bytes)
-- `retry_limit`: Maximum download attempts (default: 3)
-- `retry_delay`: Time between retries (default: 1.0 seconds)
-
-## Error Handling
-
-The application includes:
-- Comprehensive error logging
-- Thread-safe logging mechanism
-- Visual error indicators
-- Detailed error messages
-- Error log viewer
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built for accessing Azerbaijan National Library digital collection
-- Uses PyMuPDF for PDF handling
-- Interface built with Tkinter for cross-platform compatibility
-
-## Security Note
-
-This application includes basic rate limiting and respects server limitations. Please use responsibly and in accordance with the library's terms of service.
+MIT — see [LICENSE](LICENSE).
 
 ## Disclaimer
 
-This tool is meant for legitimate access to digital library resources. Users are responsible for complying with all applicable laws and terms of service. This application is not affiliated with the Azerbaijan National Library. Created by Javid Agha.
+This tool is for legitimate access to digital library resources. Users are responsible for complying with applicable laws and the library's terms of service. Not affiliated with the Azerbaijan National Library.
 
-## Contact
-
-Javid Agha - [https://cavid.info](https://cavid.info)
-
-Project Link: [https://github.com/cavidaga/kitab](https://github.com/cavidaga/kitab)
+Created by [Javid Agha](https://cavid.info) · [github.com/cavidaga/kitab](https://github.com/cavidaga/kitab)

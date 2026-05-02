@@ -2,6 +2,11 @@
   "name": "kitab",
   "version": "1.0.0",
   "description": "Kitab — Azerbaijan National Library Downloader",
+  "author": "Javid Agha <javid@cavid.info>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cavidaga/kitab.git"
+  },
   "main": "src/main/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --no-sandbox\"",
@@ -28,6 +33,7 @@
   "build": {
     "appId": "az.anl.kitab",
     "productName": "Kitab",
+    "publish": null,
     "directories": {
       "output": "dist-electron"
     },

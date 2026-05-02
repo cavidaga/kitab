@@ -1,22 +1,21 @@
-# Kitab
+<div align="center">
 
-A desktop app for downloading books from the [Azerbaijan National Library](http://web2.anl.az:81/read) digital collection. Downloads pages, assembles them into a PDF with catalog metadata, and saves everything locally.
+<h1>Kitab</h1>
+<p>Download books from the <a href="http://web2.anl.az:81/read">Azerbaijan National Library</a> digital collection as PDFs.</p>
 
-Built with Electron + React. No Python, no extra runtimes — just download and run.
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-Setup-x64.exe">
+  <img src="https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
+</a>
+&nbsp;
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-x64.AppImage">
+  <img src="https://img.shields.io/badge/Download_for-Linux-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" />
+</a>
+&nbsp;
+<a href="https://github.com/cavidaga/kitab/releases">
+  <img src="https://img.shields.io/github/v/release/cavidaga/kitab?style=for-the-badge&label=Latest%20Release&color=2ea44f" alt="Latest Release" />
+</a>
 
----
-
-## Download
-
-Grab the latest release for your platform from the [Releases page](https://github.com/cavidaga/kitab/releases):
-
-| Platform | File |
-|---|---|
-| **Windows** | `Kitab Setup x.x.x.exe` |
-| **Linux** | `Kitab-x.x.x.AppImage` |
-
-> Windows users: run the installer, click through the wizard, launch from the desktop shortcut.  
-> Linux users: `chmod +x Kitab-*.AppImage && ./Kitab-*.AppImage`
+</div>
 
 ---
 
@@ -25,8 +24,8 @@ Grab the latest release for your platform from the [Releases page](https://githu
 - **Download books by ID** — accepts `vtls000000004` or bare numeric IDs
 - **Custom page ranges** — start and end page, or download the entire book
 - **Queue** — add multiple books, process them one by one
-- **PDF assembly** — pages are combined into a single PDF automatically
-- **Catalog metadata** — title, author, and year are fetched and embedded in the PDF
+- **PDF assembly** — pages combined into a single PDF automatically
+- **Catalog metadata** — title, author, and year fetched and embedded in the PDF
 - **Delete images after PDF** — keep only the PDF, discard the raw page files
 - **Activity log** — timestamped download events, collapsible
 - **Bilingual** — English and Azerbaijani interface
@@ -34,11 +33,25 @@ Grab the latest release for your platform from the [Releases page](https://githu
 
 ---
 
+## Installation
+
+**Windows** — Run `Kitab-Setup-x64.exe` and follow the installer wizard. A desktop shortcut and Start Menu entry are created automatically.
+
+> **"Windows protected your PC" warning** — This appears because the app isn't signed with a paid code-signing certificate. Click **More info → Run anyway** to proceed. The app is open source and the full code is in this repository.
+
+**Linux** — Make the AppImage executable and run it:
+```bash
+chmod +x Kitab-x64.AppImage
+./Kitab-x64.AppImage
+```
+
+---
+
 ## Usage
 
 1. Launch the app
 2. Paste a Book ID (e.g. `vtls000000004`) into the field
-3. Optionally set a start/end page (leave end blank to download everything)
+3. Optionally set a start/end page (leave end blank for the whole book)
 4. Click **Select output folder** to choose where files are saved
 5. Click **Download**
 
@@ -48,7 +61,7 @@ To queue several books: fill in a Book ID and click **Add to queue** for each on
 
 ## CLI
 
-The headless Python CLI (`kitab_cli.py`) is still available for scripting and server use:
+The headless Python CLI is available for scripting and server use:
 
 ```bash
 python3 kitab_cli.py vtls000000004 -o ~/books -s 1 -e 50 -d
@@ -79,22 +92,18 @@ npm install
 npm run dev        # Vite + Electron dev mode
 ```
 
-**Stack:**
-- Electron 33 — desktop shell
-- React 18 + Vite — renderer
-- pdf-lib — PDF assembly (pure JS, no native deps)
-- Node.js built-in `http` — page fetching
-
 **Build installers locally:**
 ```bash
-npm run dist:win    # → dist-electron/Kitab Setup x.x.x.exe
-npm run dist:linux  # → dist-electron/Kitab-x.x.x.AppImage
+npm run dist:win    # → dist-electron/Kitab-Setup-x64.exe
+npm run dist:linux  # → dist-electron/Kitab-x64.AppImage
 ```
 
-CI builds run automatically on GitHub Actions when a version tag is pushed:
+**Release via CI** — push a version tag and GitHub Actions builds all platforms automatically:
 ```bash
 git tag v2.1.0 && git push origin v2.1.0
 ```
+
+**Stack:** Electron 33 · React 18 · Vite · pdf-lib
 
 ---
 

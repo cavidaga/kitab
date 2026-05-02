@@ -47,7 +47,8 @@
       "target": [
         { "target": "nsis", "arch": ["x64"] }
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "artifactName": "Kitab-Setup-${arch}.exe"
     },
     "nsis": {
       "oneClick": false,
@@ -59,7 +60,8 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "category": "Utility",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "artifactName": "Kitab-${arch}.AppImage"
     },
     "mac": {
       "target": "dmg",

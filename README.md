@@ -7,8 +7,16 @@
   <img src="https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
 </a>
 &nbsp;
-<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-x64.AppImage">
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-linux-x64.AppImage">
   <img src="https://img.shields.io/badge/Download_for-Linux-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" />
+</a>
+&nbsp;
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-mac-arm64.dmg">
+  <img src="https://img.shields.io/badge/Download_for-macOS_(Apple_Silicon)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS Apple Silicon" />
+</a>
+&nbsp;
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-mac-x64.dmg">
+  <img src="https://img.shields.io/badge/Download_for-macOS_(Intel)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS Intel" />
 </a>
 &nbsp;
 <a href="https://github.com/cavidaga/kitab/releases">
@@ -41,9 +49,13 @@
 
 **Linux** — Make the AppImage executable and run it:
 ```bash
-chmod +x Kitab-x64.AppImage
-./Kitab-x64.AppImage
+chmod +x Kitab-linux-x64.AppImage
+./Kitab-linux-x64.AppImage
 ```
+
+**macOS** — Open the `.dmg`, drag Kitab to Applications. Use `arm64` for Apple Silicon (M1/M2/M3) or `x64` for Intel Macs.
+
+> **"Kitab can't be opened" (macOS Gatekeeper)** — Right-click the app → **Open** → **Open** to bypass the warning on first launch. This appears because the app isn't notarized with an Apple Developer certificate.
 
 ---
 

@@ -3,8 +3,8 @@ name: Build & Release
 on:
   push:
     tags:
-      - 'v*'          # Triggers on version tags like v1.0.0
-  workflow_dispatch:  # Manual trigger from GitHub UI
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,13 +14,13 @@ jobs:
         include:
           - os: windows-latest
             platform: win
-            artifact: dist-electron/*.exe
+            artifact: dist-electron/Kitab-Setup-x64.exe
           - os: ubuntu-latest
             platform: linux
-            artifact: dist-electron/*.AppImage
+            artifact: dist-electron/Kitab-linux-x64.AppImage
           - os: macos-latest
             platform: mac
-            artifact: dist-electron/*.dmg
+            artifact: dist-electron/Kitab-mac-*.dmg
 
     runs-on: ${{ matrix.os }}
 
@@ -35,7 +35,6 @@ jobs:
           cache: npm
           cache-dependency-path: electron-app/package-lock.json
 
-      # Linux: install dependencies for electron-builder
       - name: Install Linux build deps
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -63,7 +62,6 @@ jobs:
           path: electron-app/${{ matrix.artifact }}
           if-no-files-found: warn
 
-  # Create a GitHub Release when a version tag is pushed
   release:
     needs: build
     if: startsWith(github.ref, 'refs/tags/')

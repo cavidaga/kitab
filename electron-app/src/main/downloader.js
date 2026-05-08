@@ -67,6 +67,36 @@ function fetchBuf(url, extraHeaders = {}, redirects = 5) {
   })
 }
 
+// Like fetchBuf but also returns response headers (for cookie extraction)
+function fetchBufWithHeaders(url, extraHeaders = {}, redirects = 5) {
+  return new Promise((resolve, reject) => {
+    if (redirects < 0) return reject(new Error('Too many redirects'))
+    const mod = url.startsWith('https') ? https : http
+    const req = mod.get(url, {
+      headers: { 'User-Agent': UA, 'Referer': BASE_URL, ...extraHeaders },
+      timeout: TIMEOUT_MS,
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const loc = res.headers.location.startsWith('http')
+          ? res.headers.location
+          : new URL(res.headers.location, url).href
+        res.resume()
+        return resolve(fetchBufWithHeaders(loc, extraHeaders, redirects - 1))
+      }
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        res.resume()
+        return reject(new Error(`HTTP ${res.statusCode} for ${url}`))
+      }
+      const chunks = []
+      const resHeaders = res.headers
+      res.on('data', c => chunks.push(c))
+      res.on('end', () => resolve({ buf: Buffer.concat(chunks), headers: resHeaders }))
+    })
+    req.on('error', reject)
+    req.on('timeout', () => { req.destroy(); reject(new Error(`Timeout: ${url}`)) })
+  })
+}
+
 function fetchText(url) {
   return fetchBuf(url).then(b => b.toString('utf8'))
 }
@@ -99,10 +129,23 @@ async function downloadPage(bibid, pageNo, outFile) {
   const preloadUrl = `${BASE_URL}/page.php?bibid=${bibid}&pno=${pageNo}`
   const imageUrl   = `${BASE_URL}/img.php?bibid=${bibid}&pno=${pageNo}`
 
-  await fetchBuf(preloadUrl)        // trigger the server-side preload
+  // Hit page.php first to trigger server-side preload and collect any session cookie
+  const { headers: preloadHeaders } = await fetchBufWithHeaders(preloadUrl)
   await sleep(DELAY_MS)
 
-  const imgBuf = await fetchBuf(imageUrl)
+  // Build cookie string from Set-Cookie headers so the image request is authorised
+  const setCookieHeader = preloadHeaders['set-cookie']
+  const cookieStr = Array.isArray(setCookieHeader)
+    ? setCookieHeader.map(c => c.split(';')[0]).join('; ')
+    : (setCookieHeader ? setCookieHeader.split(';')[0] : '')
+
+  // The image server checks that Referer matches the exact page URL for this book
+  const imgHeaders = {
+    'Referer': preloadUrl,
+    ...(cookieStr ? { 'Cookie': cookieStr } : {}),
+  }
+
+  const imgBuf = await fetchBuf(imageUrl, imgHeaders)
   if (imgBuf.length < MIN_IMG_BYTES) throw new Error('Image too small — likely invalid.')
 
   fs.writeFileSync(outFile, imgBuf)

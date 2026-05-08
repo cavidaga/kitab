@@ -119,10 +119,9 @@ export function StatPill({ label, value, tok }) {
 }
 
 // ─── LogEntry ─────────────────────────────────────────────────────────────────
-export function LogEntry({ msg, level, tok }) {
+export function LogEntry({ msg, level, time, tok }) {
   const colors = { error: T.red, warning: '#e09a3a', success: T.green, info: tok.text1 }
   const color  = colors[level] || tok.text1
-  const time   = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '3px 0' }}>
       <span style={{ fontFamily: tok.mono, fontSize: 10, color: tok.text2, whiteSpace: 'nowrap', marginTop: 1 }}>{time}</span>

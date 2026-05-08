@@ -28,9 +28,15 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
   const [queue, setQueue] = useState([])
 
   // ── Logs ──────────────────────────────────────────────────────────────────
-  const [logs,     setLogs]     = useState([{ msg: 'Ready. Enter a Book ID to begin.', level: 'info' }])
+  const [logs,     setLogs]     = useState([{ msg: 'Ready. Enter a Book ID to begin.', level: 'info', time: new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }])
   const [logsOpen, setLogsOpen] = useState(true)
   const logRef = useRef(null)
+
+  // Capture timestamp at the moment the entry is created, not at render time
+  const addLog = (msg, level = 'info') => {
+    const time = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    setLogs(l => [...l, { msg, level, time }])
+  }
 
   // ── Elapsed timer ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -50,7 +56,7 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
       const { type, level, msg, page, total } = evt
 
       if (msg) {
-        setLogs(l => [...l, { msg, level: level || 'info' }])
+        addLog(msg, level || 'info')
       }
 
       if (type === 'total') {
@@ -69,6 +75,7 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
       }
     })
     return unsub
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Auto-scroll logs ──────────────────────────────────────────────────────
@@ -86,7 +93,7 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
     if (!outputDir) {
       const dir = await window.kitab?.openDir()
       if (!dir) {
-        setLogs(l => [...l, { msg: 'No output folder selected.', level: 'warning' }])
+        addLog('No output folder selected.', 'warning')
         return
       }
       setOutputDir(dir)
@@ -102,7 +109,7 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
     setStartTime(Date.now())
     setDownloading(true)
     setCurrentBibid(targetBibid)
-    setLogs(l => [...l, { msg: `Starting download: ${targetBibid}`, level: 'info' }])
+    addLog(`Starting download: ${targetBibid}`, 'info')
 
     const result = await window.kitab?.startDownload({
       bibid: targetBibid,
@@ -115,22 +122,27 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
     if (result && !result.ok) {
       setDownloading(false)
       setStartTime(null)
-      setLogs(l => [...l, { msg: result.error, level: 'error' }])
+      addLog(result.error, 'error')
     }
   }
 
   const cancelDownload = async () => {
-    await window.kitab?.cancelDownload({ bibid: currentBibid })
+    // Normalize the bibid the same way downloader.js does so the cancelFlags map lookup succeeds.
+    // e.g. 'vtls000112386' → '112386'
+    const normBibid = /^vtls/i.test(currentBibid)
+      ? (currentBibid.replace(/\D/g, '').replace(/^0+/, '') || currentBibid)
+      : currentBibid
+    await window.kitab?.cancelDownload({ bibid: normBibid })
     setDownloading(false)
     setCurrentBibid('')
     setStartTime(null)
-    setLogs(l => [...l, { msg: 'Download cancelled.', level: 'warning' }])
+    addLog('Download cancelled.', 'warning')
   }
 
   const addToQueue = () => {
     if (!bookId.trim()) return
     setQueue(q => [...q, bookId.trim()])
-    setLogs(l => [...l, { msg: `Added to queue: ${bookId.trim()}`, level: 'info' }])
+    addLog(`Added to queue: ${bookId.trim()}`, 'info')
     setBookId('')
   }
 
@@ -300,7 +312,7 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
               height: 120, overflow: 'auto',
               display: 'flex', flexDirection: 'column', gap: 2,
             }}>
-              {logs.map((l, i) => <LogEntry key={i} msg={l.msg} level={l.level} tok={tok} />)}
+              {logs.map((l, i) => <LogEntry key={i} msg={l.msg} level={l.level} time={l.time} tok={tok} />)}
             </div>
           )}
         </div>

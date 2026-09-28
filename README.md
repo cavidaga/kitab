@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Download_for-Ubuntu_/_Debian-A81D33?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Download for Ubuntu / Debian (.deb)" />
 </a>
 &nbsp;
-<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-x64.AppImage">
+<a href="https://github.com/cavidaga/kitab/releases/latest/download/Kitab-x86_64.AppImage">
   <img src="https://img.shields.io/badge/Download_for-Linux_(AppImage)-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux AppImage" />
 </a>
 &nbsp;
@@ -58,8 +58,8 @@ sudo apt install ./Kitab-linux.deb
 
 **Linux (.AppImage)** — Make it executable and run it:
 ```bash
-chmod +x Kitab-x64.AppImage
-./Kitab-x64.AppImage
+chmod +x Kitab-x86_64.AppImage
+./Kitab-x86_64.AppImage
 ```
 > **AppImage FUSE error?** Modern Linux distros (Ubuntu 22.04+) require FUSE 2. If you see `dlopen(): error loading libfuse.so.2`, you can either install it (`sudo apt install libfuse2`) or use the `.deb` version instead.
 
@@ -117,7 +117,7 @@ npm run dev        # Vite + Electron dev mode
 **Build installers locally:**
 ```bash
 npm run dist:win    # → dist-electron/Kitab-Setup-x64.exe
-npm run dist:linux  # → dist-electron/Kitab-x64.AppImage
+npm run dist:linux  # → dist-electron/Kitab-x86_64.AppImage
 ```
 
 **Release via CI** — push a version tag and GitHub Actions builds all platforms automatically:

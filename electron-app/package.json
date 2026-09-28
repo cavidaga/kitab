@@ -37,6 +37,7 @@
     "appId": "az.anl.kitab",
     "productName": "Kitab",
     "publish": null,
+    "afterPack": "build/after-pack.js",
     "directories": {
       "output": "dist-electron"
     },

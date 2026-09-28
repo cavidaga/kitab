@@ -74,7 +74,7 @@ def normalize_bibid(bibid):
 
 def get_total_pages(bibid):
     page_url = f"{BASE_URL}/page.php?bibid={bibid}&pno=1"
-    response = requests.get(page_url, headers=HEADERS, timeout=10)
+    response = requests.get(page_url, headers=HEADERS, timeout=10, allow_redirects=False)
     response.raise_for_status()
     match = re.search(r'last_page_params="\?bibid=\d+&pno=(\d+)"', response.text)
     if match:

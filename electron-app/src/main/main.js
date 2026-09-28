@@ -4,10 +4,13 @@ const { downloadBook, cancelDownload } = require('./downloader')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
-// Disable hardware sandbox on Linux to prevent launch issues for end-users
-// on modern distributions (like Ubuntu 24.04+) with strict user namespaces.
+// AppImageHub and many distros start the app with no GPU and a tiny /dev/shm.
+// Without these, Chromium leaves the window on its background color.
+// no-sandbox is also required where user namespaces are restricted (Ubuntu 24.04+).
 if (process.platform === 'linux') {
+  app.disableHardwareAcceleration()
   app.commandLine.appendSwitch('no-sandbox')
+  app.commandLine.appendSwitch('disable-dev-shm-usage')
 }
 
 // ─── Create Window ────────────────────────────────────────────────────────────

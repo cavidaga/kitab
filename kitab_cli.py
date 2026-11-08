@@ -26,7 +26,7 @@ except ImportError:
 import re
 import argparse
 
-BASE_URL = "http://web2.anl.az:81/read"
+BASE_URL = "https://web2.anl.az/read"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
     "Referer": BASE_URL,
@@ -63,6 +63,17 @@ def log(msg, level="info"):
     emit({"type": "log", "level": level, "msg": msg})
 
 # ── Core functions ────────────────────────────────────────────────────────────
+class CloudflareBlocked(Exception):
+    pass
+
+def check_response(response):
+    if response.headers.get("cf-mitigated") == "challenge":
+        raise CloudflareBlocked(
+            "The library site is behind a Cloudflare browser check, which this CLI "
+            "cannot pass. Use the Kitab desktop app instead."
+        )
+    response.raise_for_status()
+
 def normalize_bibid(bibid):
     if bibid.startswith("vtls"):
         numeric_part = ''.join(filter(str.isdigit, bibid))
@@ -75,7 +86,7 @@ def normalize_bibid(bibid):
 def get_total_pages(bibid):
     page_url = f"{BASE_URL}/page.php?bibid={bibid}&pno=1"
     response = requests.get(page_url, headers=HEADERS, timeout=10, allow_redirects=False)
-    response.raise_for_status()
+    check_response(response)
     match = re.search(r'last_page_params="\?bibid=\d+&pno=(\d+)"', response.text)
     if match:
         return int(match.group(1))
@@ -85,10 +96,10 @@ def download_page(session, bibid, page_no, output_file):
     preload_url = f"{BASE_URL}/page.php?bibid={bibid}&pno={page_no}"
     image_url   = f"{BASE_URL}/img.php?bibid={bibid}&pno={page_no}"
     try:
-        session.get(preload_url, headers=HEADERS, timeout=10).raise_for_status()
+        check_response(session.get(preload_url, headers=HEADERS, timeout=10))
         time.sleep(DELAY)
         response = session.get(image_url, headers=HEADERS, stream=True, timeout=10)
-        response.raise_for_status()
+        check_response(response)
         with open(output_file, "wb") as f:
             f.write(response.content)
         if os.path.getsize(output_file) < MIN_IMAGE_SIZE:

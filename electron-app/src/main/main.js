@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const { downloadBook, cancelDownload } = require('./downloader')
+const { closeAll: closeSiteWindows } = require('./http')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
@@ -39,8 +40,11 @@ function createWindow() {
 }
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────
+app.on('before-quit', closeSiteWindows)
+
 app.whenReady().then(() => {
   const win = createWindow()
+  win.on('closed', closeSiteWindows)
 
   // ── Window controls ─────────────────────────────────────────────────────────
   ipcMain.on('window:minimize', () => win.minimize())

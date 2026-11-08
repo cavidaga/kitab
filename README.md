@@ -79,9 +79,13 @@ chmod +x Kitab-x86_64.AppImage
 
 To queue several books: fill in a Book ID and click **Add to queue** for each one, then click **Process queue**.
 
+> **Cloudflare check** — The library site is protected by Cloudflare. Kitab passes the check in the background, but if Cloudflare asks you to confirm you are human, a small window opens: tick the box and the download continues.
+
 ---
 
 ## CLI
+
+> **Note:** the library site now sits behind a Cloudflare browser check that plain HTTP clients cannot pass, so the CLI currently stops with an explanatory error. Use the desktop app to download books.
 
 The headless Python CLI is available for scripting and server use:
 

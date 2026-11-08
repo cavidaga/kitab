@@ -1,8 +1,8 @@
 /**
- * downloader.js — Pure Node.js download engine for Kitab.
+ * downloader.js — Download engine for Kitab.
  *
  * No Python required. Uses:
- *   - Node built-in http/https  → page & image fetching
+ *   - ./http (Electron session) → page & image fetching through Cloudflare
  *   - pdf-lib                   → JPEG-to-PDF assembly + metadata
  *
  * emitEvent(evt) is called with structured objects:
@@ -16,18 +16,15 @@
 
 'use strict'
 
-const http  = require('http')
-const https = require('https')
 const fs    = require('fs')
 const path  = require('path')
 const { PDFDocument } = require('pdf-lib')
+const { fetchBuf, fetchText } = require('./http')
 
-const BASE_URL      = 'http://web2.anl.az:81/read'
+const BASE_URL      = 'https://web2.anl.az/read'
 const META_BASE_URL = 'https://ek.anl.az/lib/item'
-const UA            = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
 const DELAY_MS      = 2000
 const MIN_IMG_BYTES = 1024
-const TIMEOUT_MS    = 15000
 
 // ── Active cancel flags ───────────────────────────────────────────────────────
 const cancelFlags = new Map()   // bibid → { cancelled: Boolean }
@@ -35,70 +32,6 @@ const cancelFlags = new Map()   // bibid → { cancelled: Boolean }
 function cancelDownload(bibid) {
   const flag = cancelFlags.get(bibid)
   if (flag) flag.cancelled = true
-}
-
-// ── Low-level HTTP helper ─────────────────────────────────────────────────────
-function fetchBuf(url, extraHeaders = {}, redirects = 5) {
-  return new Promise((resolve, reject) => {
-    if (redirects < 0) return reject(new Error('Too many redirects'))
-    const mod = url.startsWith('https') ? https : http
-    const req = mod.get(url, {
-      headers: { 'User-Agent': UA, 'Referer': BASE_URL, ...extraHeaders },
-      timeout: TIMEOUT_MS,
-    }, (res) => {
-      // Follow redirects
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        const loc = res.headers.location.startsWith('http')
-          ? res.headers.location
-          : new URL(res.headers.location, url).href
-        res.resume()
-        return resolve(fetchBuf(loc, extraHeaders, redirects - 1))
-      }
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        res.resume()
-        return reject(new Error(`HTTP ${res.statusCode} for ${url}`))
-      }
-      const chunks = []
-      res.on('data', c => chunks.push(c))
-      res.on('end', () => resolve(Buffer.concat(chunks)))
-    })
-    req.on('error', reject)
-    req.on('timeout', () => { req.destroy(); reject(new Error(`Timeout: ${url}`)) })
-  })
-}
-
-// Like fetchBuf but also returns response headers (for cookie extraction)
-function fetchBufWithHeaders(url, extraHeaders = {}, redirects = 5) {
-  return new Promise((resolve, reject) => {
-    if (redirects < 0) return reject(new Error('Too many redirects'))
-    const mod = url.startsWith('https') ? https : http
-    const req = mod.get(url, {
-      headers: { 'User-Agent': UA, 'Referer': BASE_URL, ...extraHeaders },
-      timeout: TIMEOUT_MS,
-    }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        const loc = res.headers.location.startsWith('http')
-          ? res.headers.location
-          : new URL(res.headers.location, url).href
-        res.resume()
-        return resolve(fetchBufWithHeaders(loc, extraHeaders, redirects - 1))
-      }
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        res.resume()
-        return reject(new Error(`HTTP ${res.statusCode} for ${url}`))
-      }
-      const chunks = []
-      const resHeaders = res.headers
-      res.on('data', c => chunks.push(c))
-      res.on('end', () => resolve({ buf: Buffer.concat(chunks), headers: resHeaders }))
-    })
-    req.on('error', reject)
-    req.on('timeout', () => { req.destroy(); reject(new Error(`Timeout: ${url}`)) })
-  })
-}
-
-function fetchText(url) {
-  return fetchBuf(url).then(b => b.toString('utf8'))
 }
 
 function sleep(ms) {
@@ -116,61 +49,66 @@ function normalizeBibid(raw) {
   throw new Error(`Invalid Book ID "${raw}". Must be numeric or start with "vtls".`)
 }
 
-// ── Total pages ───────────────────────────────────────────────────────────────
-async function getTotalPages(bibid) {
-  const html = await fetchText(`${BASE_URL}/page.php?bibid=${bibid}&pno=1`)
+function htmlToText(html) {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// ── Book info (page count + header metadata) ──────────────────────────────────
+async function getBookInfo(bibid, netOpts) {
+  const html = await fetchText(`${BASE_URL}/page.php?bibid=${bibid}&pno=1`, netOpts)
   const m = html.match(/last_page_params="\?bibid=\d+&pno=(\d+)"/)
-  if (m) return parseInt(m[1], 10)
-  throw new Error('Could not determine total page count.')
+  if (!m) throw new Error('Could not determine total page count.')
+
+  const meta   = {}
+  const title  = html.match(/class="book-title[^"]*">([\s\S]*?)<\/h2>/i)
+  const author = html.match(/class="book-author[^"]*">([\s\S]*?)<\/p>/i)
+  if (title)  meta.title  = htmlToText(title[1])
+  if (author) meta.author = htmlToText(author[1])
+
+  return { totalPages: parseInt(m[1], 10), meta }
 }
 
 // ── Download a single page image ──────────────────────────────────────────────
-async function downloadPage(bibid, pageNo, outFile) {
+async function downloadPage(bibid, pageNo, outFile, netOpts) {
   const preloadUrl = `${BASE_URL}/page.php?bibid=${bibid}&pno=${pageNo}`
   const imageUrl   = `${BASE_URL}/img.php?bibid=${bibid}&pno=${pageNo}`
 
-  // Hit page.php first to trigger server-side preload and collect any session cookie
-  const { headers: preloadHeaders } = await fetchBufWithHeaders(preloadUrl)
+  // Hit page.php first to trigger the server-side preload for this page
+  await fetchBuf(preloadUrl, netOpts)
   await sleep(DELAY_MS)
 
-  // Build cookie string from Set-Cookie headers so the image request is authorised
-  const setCookieHeader = preloadHeaders['set-cookie']
-  const cookieStr = Array.isArray(setCookieHeader)
-    ? setCookieHeader.map(c => c.split(';')[0]).join('; ')
-    : (setCookieHeader ? setCookieHeader.split(';')[0] : '')
-
   // The image server checks that Referer matches the exact page URL for this book
-  const imgHeaders = {
-    'Referer': preloadUrl,
-    ...(cookieStr ? { 'Cookie': cookieStr } : {}),
-  }
-
-  const imgBuf = await fetchBuf(imageUrl, imgHeaders)
+  const imgBuf = await fetchBuf(imageUrl, { ...netOpts, referrer: preloadUrl })
   if (imgBuf.length < MIN_IMG_BYTES) throw new Error('Image too small — likely invalid.')
 
   fs.writeFileSync(outFile, imgBuf)
   return true
 }
 
-// ── Metadata from catalogue ───────────────────────────────────────────────────
-async function fetchMetadata(bibid) {
+// ── Metadata from catalogue (falls back to the reader page header) ────────────
+async function fetchMetadata(bibid, fallback = {}) {
   try {
-    const html = await fetchText(`${META_BASE_URL}?id=chamo:${bibid}&theme=e-kataloq`)
-    const meta = {}
+    const html = await fetchText(`${META_BASE_URL}?id=chamo:${bibid}&theme=e-kataloq`, { interactive: false })
+    const meta = { ...fallback }
     const title  = html.match(/<h1 class="title">([\s\S]*?)<\/h1>/i)
     const author = html.match(/class="author">([\s\S]*?)<\/a>/i)
     const date   = html.match(/\$c\s+(\d{4})\s*<\/div>/)
-    if (title)  meta.title  = title[1].replace(/<[^>]+>/g, '').trim()
-    if (author) meta.author = author[1].replace(/<[^>]+>/g, '').trim()
+    if (title)  meta.title  = htmlToText(title[1])
+    if (author) meta.author = htmlToText(author[1])
     if (date)   meta.creationDate = date[1]
     return meta
   } catch {
-    return {}
+    return { ...fallback }
   }
 }
 
 // ── PDF assembly ──────────────────────────────────────────────────────────────
-async function createPdf(bookDir, bibid, startPage, endPage, deleteImages, emitEvent) {
+async function createPdf(bookDir, bibid, startPage, endPage, deleteImages, pageMeta, emitEvent) {
   const pdfPath = path.join(bookDir, `book_${bibid}.pdf`)
   const pdfDoc  = await PDFDocument.create()
 
@@ -195,7 +133,7 @@ async function createPdf(bookDir, bibid, startPage, endPage, deleteImages, emitE
   }
 
   // Embed metadata
-  const meta = await fetchMetadata(bibid)
+  const meta = await fetchMetadata(bibid, pageMeta)
   if (meta.title)  pdfDoc.setTitle(meta.title)
   if (meta.author) pdfDoc.setAuthor(meta.author)
   pdfDoc.setProducer('Kitab — Azerbaijan National Library')
@@ -229,9 +167,18 @@ async function downloadBook({ bibid: rawBibid, outputDir, startPage = 1, endPage
   try {
     emitEvent({ type: 'log', level: 'info', msg: `Fetching info for book ID: ${bibid}…` })
 
-    let totalPages
+    const netOpts = {
+      onChallenge: (reason) => emitEvent({
+        type: 'log', level: 'warning',
+        msg: reason === 'checkbox'
+          ? 'The library site is asking for a human check — tick the box in the window that opened.'
+          : 'The library site is taking a while to verify this computer — a window opened in case it needs you.',
+      }),
+    }
+
+    let totalPages, pageMeta
     try {
-      totalPages = await getTotalPages(bibid)
+      ({ totalPages, meta: pageMeta } = await getBookInfo(bibid, netOpts))
     } catch (e) {
       emitEvent({ type: 'log', level: 'error', msg: `Error fetching total pages: ${e.message}` })
       return false
@@ -264,7 +211,7 @@ async function downloadBook({ bibid: rawBibid, outputDir, startPage = 1, endPage
       }
 
       try {
-        await downloadPage(bibid, pageNo, outFile)
+        await downloadPage(bibid, pageNo, outFile, netOpts)
         pagesDownloaded++
         emitEvent({
           type: 'progress', page: pagesDownloaded, total,
@@ -279,7 +226,7 @@ async function downloadBook({ bibid: rawBibid, outputDir, startPage = 1, endPage
     }
 
     emitEvent({ type: 'log', level: 'info', msg: 'Combining images into PDF…' })
-    await createPdf(bookDir, bibid, start, end, deleteImages, emitEvent)
+    await createPdf(bookDir, bibid, start, end, deleteImages, pageMeta, emitEvent)
     emitEvent({ type: 'done', msg: 'Download complete!', level: 'success' })
     return true
 

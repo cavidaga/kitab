@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { T } from '../tokens.js'
 import {
   FieldInput, Toggle, ProgressBar, StatPill,
-  LogEntry, QueueItem, Btn, ControlBar,
+  LogEntry, QueueItem, Btn, ControlBar, Notice,
 } from './ui.jsx'
+
+const NOTICE_KEY = 'kitab.notice.libraryChange.v1'
 
 export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
   // ── Form state ────────────────────────────────────────────────────────────
@@ -26,6 +28,15 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
 
   // ── Queue ─────────────────────────────────────────────────────────────────
   const [queue, setQueue] = useState([])
+
+  // ── Notice ────────────────────────────────────────────────────────────────
+  const [showNotice, setShowNotice] = useState(() => {
+    try { return localStorage.getItem(NOTICE_KEY) !== 'dismissed' } catch { return true }
+  })
+  const dismissNotice = () => {
+    setShowNotice(false)
+    try { localStorage.setItem(NOTICE_KEY, 'dismissed') } catch {}
+  }
 
   // ── Logs ──────────────────────────────────────────────────────────────────
   const [logs,     setLogs]     = useState([{ msg: 'Ready. Enter a Book ID to begin.', level: 'info', time: new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }])
@@ -183,6 +194,17 @@ export function CommandPanel({ lang, setLang, dark, setDark, tok, t }) {
 
       {/* Main content */}
       <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Library change notice */}
+        {showNotice && (
+          <Notice
+            title={t.noticeTitle}
+            body={t.noticeBody}
+            dismissLabel={t.noticeDismiss}
+            onDismiss={dismissNotice}
+            tok={tok}
+          />
+        )}
 
         {/* Book ID */}
         <FieldInput

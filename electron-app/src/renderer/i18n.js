@@ -33,6 +33,9 @@ export const LANG = {
     optional: 'optional',
     selectFolder: 'Select output folder…',
     noFolder: 'No folder selected',
+    noticeTitle: 'The National Library changed how books are downloaded',
+    noticeBody: 'The library site now runs a security check on every visitor before it shows anything. So the first download of a session can sit for a minute or two before the pages start coming. Keep the app open and be patient. If a small window opens asking you to confirm you are human, tick the box — the download continues by itself. After the first time, downloads are fast again.',
+    noticeDismiss: 'Got it',
   },
   az: {
     title: 'Kitab',
@@ -67,5 +70,8 @@ export const LANG = {
     optional: 'istəyə görə',
     selectFolder: 'Qovluq seçin…',
     noFolder: 'Qovluq seçilməyib',
+    noticeTitle: 'Milli Kitabxana kitabların yüklənmə qaydasını dəyişdi',
+    noticeBody: 'Kitabxananın saytı artıq hər ziyarətçini yoxlayır və yalnız bundan sonra səhifələri göstərir. Buna görə birinci yükləmə səhifələr başlamazdan əvvəl bir-iki dəqiqə gözlədə bilər. Proqramı açıq saxlayın və səbirli olun. Kiçik bir pəncərə açılıb insan olduğunuzu təsdiqləməyinizi istəsə, qutunu işarələyin — yükləmə özü davam edəcək. Birinci dəfədən sonra yükləmələr yenidən sürətli olur.',
+    noticeDismiss: 'Anladım',
   },
 }

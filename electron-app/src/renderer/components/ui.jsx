@@ -21,6 +21,52 @@ export function KitabLogo({ size = 28, dark = true, amber }) {
   )
 }
 
+// ─── Notice ───────────────────────────────────────────────────────────────────
+// Shown until dismissed, once per app version.
+export function Notice({ title, body, dismissLabel, onDismiss, tok }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <div className="fade-in" style={{
+      background: tok.amberGlow,
+      border: `1px solid ${tok.amber}`,
+      borderRadius: 8,
+      padding: '12px 14px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+        <span style={{ color: tok.amber, fontSize: 13, lineHeight: 1.4, flexShrink: 0 }}>▲</span>
+        <span style={{ fontFamily: tok.body, fontSize: 13, fontWeight: 600, color: tok.text0, lineHeight: 1.4 }}>
+          {title}
+        </span>
+      </div>
+      <p style={{ fontFamily: tok.body, fontSize: 12.5, color: tok.text1, lineHeight: 1.6, margin: 0 }}>
+        {body}
+      </p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          onClick={onDismiss}
+          onMouseEnter={() => setHov(true)}
+          onMouseLeave={() => setHov(false)}
+          style={{
+            background: hov ? tok.amber : 'none',
+            color: hov ? tok.bg0 : tok.amber,
+            border: `1px solid ${tok.amber}`,
+            borderRadius: 4,
+            padding: '4px 12px',
+            fontFamily: tok.mono,
+            fontSize: 11,
+            letterSpacing: '0.04em',
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s',
+          }}
+        >{dismissLabel}</button>
+      </div>
+    </div>
+  )
+}
+
 // ─── FieldInput ───────────────────────────────────────────────────────────────
 export function FieldInput({ label, placeholder, value, onChange, hint, tok }) {
   const [focused, setFocused] = useState(false)

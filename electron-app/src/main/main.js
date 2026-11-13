@@ -53,6 +53,9 @@ app.whenReady().then(() => {
   })
   ipcMain.on('window:close', () => win.close())
 
+  // ── App version (shown in the UI so users can check for updates) ─────────────
+  ipcMain.handle('app:version', () => app.getVersion())
+
   // ── Choose output directory ──────────────────────────────────────────────────
   ipcMain.handle('dialog:openDir', async () => {
     const result = await dialog.showOpenDialog(win, {

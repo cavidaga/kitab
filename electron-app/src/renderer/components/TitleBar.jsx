@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { KitabLogo } from './ui.jsx'
 
 export function TitleBar({ dark, tok, t }) {
   const [hovMin,  setHovMin]  = useState(false)
   const [hovMax,  setHovMax]  = useState(false)
   const [hovClose, setHovClose] = useState(false)
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    window.kitab?.getVersion?.().then(v => { if (v) setVersion(v) }).catch(() => {})
+  }, [])
 
   const btn = (label, hov, setHov, action, color) => (
     <button
@@ -46,7 +51,7 @@ export function TitleBar({ dark, tok, t }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, WebkitAppRegion: 'no-drag' }}>
         {/* Status dot */}
         <span style={{ fontFamily: tok.mono, fontSize: 10, color: tok.text2, marginRight: 8 }}>
-          {t.tagline}
+          {t.tagline}{version ? ` · v${version}` : ''}
         </span>
         {btn('−', hovMin,   setHovMin,   () => window.kitab?.minimize(), tok.borderHover)}
         {btn('□', hovMax,   setHovMax,   () => window.kitab?.maximize(), tok.borderHover)}

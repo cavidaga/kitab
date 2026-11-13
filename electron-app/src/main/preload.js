@@ -9,6 +9,9 @@ contextBridge.exposeInMainWorld('kitab', {
   // File dialog
   openDir: () => ipcRenderer.invoke('dialog:openDir'),
 
+  // App version
+  getVersion: () => ipcRenderer.invoke('app:version'),
+
   // Download
   startDownload: (opts) => ipcRenderer.invoke('download:start', opts),
   cancelDownload: (opts) => ipcRenderer.invoke('download:cancel', opts),

@@ -48,6 +48,31 @@ jobs:
         working-directory: electron-app
         run: npm ci
 
+      # The .deb/.exe/.dmg version comes from package.json, so derive it from the
+      # release tag. Otherwise every release ships as the same version and apt,
+      # dmg and the Windows installer all report nothing newer.
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: electron-app
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "Tag $GITHUB_REF_NAME is not a semver version (e.g. v2.1.0)" >&2
+            exit 1
+          fi
+          node -e '
+            const fs = require("fs")
+            const version = process.argv[1]
+            for (const file of ["package.json", "package-lock.json"]) {
+              const pkg = JSON.parse(fs.readFileSync(file, "utf8"))
+              pkg.version = version
+              if (pkg.packages && pkg.packages[""]) pkg.packages[""].version = version
+              fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n")
+            }
+          ' "$VERSION"
+          echo "Packaging as version $(node -p 'require("./package.json").version')"
+
       - name: Build Vite renderer
         working-directory: electron-app
         run: npm run build
